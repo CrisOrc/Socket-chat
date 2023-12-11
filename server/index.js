@@ -7,17 +7,19 @@ import { PORT } from "./config.js";
 
 const app = express();
 const server = http.createServer(app);
-const io = new SocketServer(server, {
-	cors: {
-		origin: "http://localhost:5173",
-	},
-});
+const io = new SocketServer(server);
 
 app.use(cors());
 app.use(morgan("dev"));
 
 io.on("connection", (socket) => {
 	console.log("New client connected");
+	socket.on("message", (body) => {
+		socket.broadcast.emit("message", {
+			body,
+			from: socket.id,
+		});
+	});
 	socket.on("disconnect", () => {
 		console.log("Client disconnected");
 	});
